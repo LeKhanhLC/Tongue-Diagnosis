@@ -28,20 +28,14 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
   >(null);
 
   const { isLoading, data } = useQuery(
-    ["/api/temp"],
+    ["api/v1/items"],
     () => getDiagnosticResult(route.params?.idResult),
     {
-      enabled: !!route.params?.idResult,
       onSuccess: (res) => {
-        const resModel = res?.data.data.data;
-        setDiagnosticResult(resModel);
+        setDiagnosticResult(res.data);
       },
     }
   );
-
-  if (isLoading || !diagnosticResult) {
-    return <Overlay visible={isLoading} overlayColor="#87DBFF" />;
-  }
 
   return (
     <SafeAreaView
@@ -59,7 +53,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
         }}
       >
         <View style={{ width: "100%" }}>
-          <TouchableOpacity
+          <View
             style={{
               display: "flex",
               alignItems: "center",
@@ -67,12 +61,9 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
               height: 71,
               backgroundColor: "#87DBFF",
             }}
-            onPress={() => {
-              console.log("vao day");
-            }}
           >
             <Text style={{ fontSize: 36 }}>診断結果</Text>
-          </TouchableOpacity>
+          </View>
         </View>
 
         <View
@@ -105,6 +96,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
               justifyContent: "center",
               paddingHorizontal: 27,
               paddingVertical: 37,
+              borderRadius: 10,
               backgroundColor: "#2C9AFF",
             }}
             onPress={() => {
@@ -117,6 +109,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
           </TouchableOpacity>
         </View>
       </View>
+      <Overlay visible={isLoading} overlayColor="#87DBFF" />
     </SafeAreaView>
   );
 };

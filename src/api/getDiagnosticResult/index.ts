@@ -1,6 +1,6 @@
 import axios from "axios";
+import { BASE_URL } from "../../../apiConfig";
 
 export const getDiagnosticResult = (idResult: string) => {
-  // return axios.get("https://jsonplaceholder.typicode.com/todos/1");
-  return axios.get(`/api/upload${idResult}`);
+  return axios.get(`${BASE_URL}/api/v1/items/${idResult}`);
 };
