@@ -1,7 +1,6 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
 import {
-  Button,
   Image,
   Platform,
   StatusBar,
@@ -14,12 +13,9 @@ import { RootStackParamList } from "../../navigations/RootStackParamList";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useImagePicker from "../../hook/useImagePicker";
 import { ImagePickerAsset, PermissionStatus } from "expo-image-picker";
-import { useMutation, useQuery } from "react-query";
-import axios from "axios";
+import { useMutation } from "react-query";
 import Overlay from "react-native-loading-spinner-overlay";
-import { UploadImage } from "../UploadImage";
 import { uploadImageData } from "../../api/postImage";
-import { getDiagnosticResult } from "../../api/getDiagnosticResult";
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Home">;
 
@@ -28,51 +24,27 @@ type HomePropsType = { navigation: HomeScreenNavigationProp };
 export const Home: React.FC<HomePropsType> = ({ navigation }) => {
   const [imagePicker, setImagePicker] = useState<ImagePickerAsset | null>(null);
 
-  const formData = new FormData();
+  const getFormData = () => {
+    let formData = new FormData();
+    formData.append("file", {
+      uri: imagePicker?.uri,
+      name: imagePicker?.fileName,
+      type: "image",
+    } as unknown as Blob);
+    return formData;
+  };
 
-  formData.append("image", {
-    uri: imagePicker?.uri,
-    name: imagePicker?.fileName,
-    type: "image/jpeg",
-  } as unknown as Blob);
-
-  // const uploadImage = async () => {
-  //   if (!imagePicker) return;
-
-  //   const formData = new FormData();
-
-  //   formData.append("image", {
-  //     uri: imagePicker.uri,
-  //     name: imagePicker.fileName,
-  //     type: "image/jpeg",
-  //   } as unknown as Blob);
-
-  //     try {
-  //       const response = await axios.post("/api/upload", formData, {
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       });
-
-  //       if (response.status === 200) {
-  //         console.log("Image uploaded successfully");
-  //       } else {
-  //         console.log("Failed to upload image");
-  //       }
-  //     } catch (error) {
-  //       console.log("Error occurred while uploading image:", error);
-  //     }
-  // };
-
-  const { mutate, isLoading } = useMutation(() => uploadImageData(formData), {
-    onError: (error) => {
-      console.log("vao day");
-      console.log("Error occurred while uploading image:", error);
-    },
-    onSuccess: (data) => {
-      console.log("Image uploaded successfully");
-    },
-  });
+  const { mutate, isLoading } = useMutation(
+    () => uploadImageData(getFormData()),
+    {
+      onError: (error) => {
+        console.log("Error occurred while uploading image:", error);
+      },
+      onSuccess: (data) => {
+        navigation.navigate("DiagnosticResult", { idResult: data.data.id });
+      },
+    }
+  );
 
   const {
     pickPhoto,
@@ -132,7 +104,9 @@ export const Home: React.FC<HomePropsType> = ({ navigation }) => {
             }
             style={styles.image}
           />
-          <Text>{imagePicker ? imagePicker.fileName : "サンプル"}</Text>
+          <Text>
+            {!!imagePicker?.fileName ? imagePicker.fileName : "サンプル"}
+          </Text>
 
           <View
             style={{
@@ -171,30 +145,6 @@ export const Home: React.FC<HomePropsType> = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
           </View>
-          {/* <View
-            style={{
-              marginTop: 29,
-              padding: 10,
-              backgroundColor: "#E3E3E3",
-              borderRadius: 10,
-            }}
-          >
-            <Button
-              color="#000"
-              title={
-                imagePicker
-                  ? "写真を変更する"
-                  : "カメラロールから\n ファイルを選択する"
-              }
-              onPress={async () => {
-                if (mediaLibraryStatus === PermissionStatus.UNDETERMINED) {
-                  requestMediaLibraryPermission();
-                }
-                if (mediaLibraryStatus === PermissionStatus.GRANTED)
-                  await pickPhoto();
-              }}
-            />
-          </View> */}
 
           <View
             style={{
