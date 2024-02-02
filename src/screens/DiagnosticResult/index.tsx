@@ -44,72 +44,83 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
       }}
     >
-      <View
-        style={{
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 37,
-          paddingTop: 44,
-        }}
-      >
-        <View style={{ width: "100%" }}>
-          <View
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: 71,
-              backgroundColor: "#87DBFF",
-            }}
-          >
-            <Text style={{ fontSize: 36 }}>診断結果</Text>
-          </View>
-        </View>
-
+      {!!diagnosticResult && (
         <View
-          style={{ width: "100%", backgroundColor: "#87DBFF", marginTop: 43 }}
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 37,
+            paddingTop: 44,
+          }}
         >
-          <View style={{ paddingVertical: 35, backgroundColor: "#CEF0FF" }}>
-            <View style={{ marginLeft: 16 }}>
-              <Text style={{ fontSize: 24 }}>烈紋1: 0</Text>
-              <Text style={{ fontSize: 24 }}>烈紋2: 1</Text>
-              <Text style={{ fontSize: 24 }}>烈紋1: 0</Text>
-              <Text style={{ fontSize: 24 }}>烈紋2: 1</Text>
-            </View>
-
-            <View style={{ marginLeft: 16, marginRight: 20, marginTop: 30 }}>
-              <Text style={{ fontSize: 20 }}>
-                診断の結果、あなたの健康状態 {"\n"}は可もなく不可もなくです。
-                {"\n"}
-                年齢に合った健康状態と言えま す。ここから良くするも悪くす{"\n"}
-                るも全てあなた次第です。
-              </Text>
+          <View style={{ width: "100%" }}>
+            <View
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: 71,
+                backgroundColor: "#87DBFF",
+              }}
+            >
+              <Text style={{ fontSize: 36 }}>診断結果</Text>
             </View>
           </View>
-        </View>
 
-        <View style={{ width: "100%", marginTop: 57 }}>
-          <TouchableOpacity
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              paddingHorizontal: 27,
-              paddingVertical: 37,
-              borderRadius: 10,
-              backgroundColor: "#2C9AFF",
-            }}
-            onPress={() => {
-              navigation.navigate("Home");
-            }}
+          <View
+            style={{ width: "100%", backgroundColor: "#87DBFF", marginTop: 43 }}
           >
-            <Text style={{ fontSize: 24, color: "#ffffff" }}>
-              もう一度診断する
-            </Text>
-          </TouchableOpacity>
+            <View style={{ paddingVertical: 35, backgroundColor: "#CEF0FF" }}>
+              <View style={{ marginLeft: 16 }}>
+                <Text style={{ fontSize: 24 }}>烈紋1: 0</Text>
+                <Text style={{ fontSize: 24 }}>烈紋2: 1</Text>
+                <Text style={{ fontSize: 24 }}>烈紋3: 0</Text>
+                <Text style={{ fontSize: 24 }}>烈紋4: 0</Text>
+                <Text style={{ fontSize: 24 }}>烈紋5: 0</Text>
+                <Text style={{ fontSize: 24 }}>烈紋6: 1</Text>
+              </View>
+
+              <View style={{ marginLeft: 16, marginRight: 20, marginTop: 30 }}>
+                <Text style={{ fontSize: 20 }}>
+                  診断の結果、あなたの健康状態 {"\n"}は可もなく不可もなくです。
+                  {"\n"}
+                  年齢に合った健康状態と言えま す。ここから良くするも悪くす
+                  {"\n"}
+                  るも全てあなた次第です。
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ width: "100%", marginTop: 57 }}>
+            <TouchableOpacity
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingHorizontal: 27,
+                paddingVertical: 37,
+                borderRadius: 10,
+                backgroundColor: "#2C9AFF",
+              }}
+              onPress={() => {
+                navigation.navigate("Home");
+              }}
+            >
+              <Text style={{ fontSize: 24, color: "#ffffff" }}>
+                もう一度診断する
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-      <Overlay visible={isLoading} overlayColor="#87DBFF" />
+      )}
+      <Overlay
+        visible={isLoading}
+        overlayColor="#87DBFF"
+        textContent="診断中です・・・・・・"
+        size={Platform.OS === "android" ? 50 : "large"}
+        textStyle={{ color: "white", fontWeight: "400", marginTop: -30 }}
+      />
     </SafeAreaView>
   );
 };
