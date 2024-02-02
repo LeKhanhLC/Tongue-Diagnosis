@@ -64,7 +64,15 @@ export const Home: React.FC<HomePropsType> = ({ navigation }) => {
   };
 
   if (isLoading) {
-    return <Overlay visible={isLoading} overlayColor="#87DBFF" />;
+    return (
+      <Overlay
+        visible={isLoading}
+        overlayColor="#87DBFF"
+        textContent="診断中です・・・・・・"
+        size={Platform.OS === "android" ? 50 : "large"}
+        textStyle={{ color: "white", fontWeight: "400", marginTop: -30 }}
+      />
+    );
   }
 
   return (
