@@ -1,10 +1,13 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
 import {
+  Alert,
+  Dimensions,
   Platform,
-  SafeAreaView,
+  ScrollView,
   StatusBar,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -13,44 +16,88 @@ import { RouteProp } from "@react-navigation/native";
 import { useQuery } from "react-query";
 import Overlay from "react-native-loading-spinner-overlay";
 import { getDiagnosticResult } from "../../api/getDiagnosticResult";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type DiagnosticResultPropsType = {
   navigation: StackNavigationProp<RootStackParamList, "DiagnosticResult">;
   route: RouteProp<RootStackParamList, "DiagnosticResult">;
 };
 
+type ResultResponseType = {
+  createdAt: string;
+  id: number;
+  imageUrl: string;
+  result: { [key in string]: string };
+  status: string;
+  updatedAt: string;
+};
+
 export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
   navigation,
   route,
 }) => {
-  const [diagnosticResult, setDiagnosticResult] = useState<
-    { [key in string]: string } | null
-  >(null);
+  const [diagnosticResult, setDiagnosticResult] =
+    useState<ResultResponseType | null>(null);
 
-  const { isLoading, data } = useQuery(
+  useQuery(
     ["api/v1/items"],
     () => getDiagnosticResult(route.params?.idResult),
     {
+      enabled: diagnosticResult?.status !== "FINISHED",
+      refetchInterval: (data) => {
+        return data?.data?.status !== "FINISHED" ? 3000 : false;
+      },
       onSuccess: (res) => {
-        setDiagnosticResult(res.data);
+        if (res.data?.status === "FINISHED") {
+          setDiagnosticResult(res.data);
+        }
+        if (res.data?.status === "FAILED") {
+          if (Platform.OS === "ios") {
+            Alert.alert("Diagnosis failure", "", [
+              {
+                text: "RETRY",
+                onPress: () => navigation.navigate("Home"),
+                style: "cancel",
+              },
+            ]);
+          } else {
+            ToastAndroid.show("Some Alert Toast", ToastAndroid.LONG);
+            navigation.navigate("Home");
+          }
+        }
       },
     }
   );
+
+  if (!diagnosticResult?.result) {
+    return (
+      <Overlay
+        visible={!diagnosticResult?.result}
+        overlayColor="#87DBFF"
+        textContent="診断中です・・・・・・"
+        size={Platform.OS === "android" ? 50 : "large"}
+        textStyle={{ color: "white", fontWeight: "400", marginTop: -30 }}
+      />
+    );
+  }
+  const windowHeight = Dimensions.get("window").height;
 
   return (
     <SafeAreaView
       style={{
         flex: 1,
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+        height: windowHeight,
       }}
     >
-      {!!diagnosticResult && (
+      <ScrollView nestedScrollEnabled style={{ height: windowHeight }}>
         <View
           style={{
             alignItems: "center",
             justifyContent: "center",
             paddingHorizontal: 37,
-            paddingTop: 44,
+            paddingTop: 14,
+            paddingBottom: 60,
           }}
         >
           <View style={{ width: "100%" }}>
@@ -68,16 +115,19 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
           </View>
 
           <View
-            style={{ width: "100%", backgroundColor: "#87DBFF", marginTop: 43 }}
+            style={{
+              width: "100%",
+              backgroundColor: "#87DBFF",
+              marginTop: 23,
+            }}
           >
             <View style={{ paddingVertical: 35, backgroundColor: "#CEF0FF" }}>
               <View style={{ marginLeft: 16 }}>
-                <Text style={{ fontSize: 24 }}>烈紋1: 0</Text>
-                <Text style={{ fontSize: 24 }}>烈紋2: 1</Text>
-                <Text style={{ fontSize: 24 }}>烈紋3: 0</Text>
-                <Text style={{ fontSize: 24 }}>烈紋4: 0</Text>
-                <Text style={{ fontSize: 24 }}>烈紋5: 0</Text>
-                <Text style={{ fontSize: 24 }}>烈紋6: 1</Text>
+                {Object.keys(diagnosticResult?.result).map((item) => (
+                  <Text style={{ fontSize: 24 }}>
+                    {item}: {diagnosticResult?.result[item]}
+                  </Text>
+                ))}
               </View>
 
               <View style={{ marginLeft: 16, marginRight: 20, marginTop: 30 }}>
@@ -92,7 +142,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
             </View>
           </View>
 
-          <View style={{ width: "100%", marginTop: 57 }}>
+          <View style={{ width: 246, marginTop: 27 }}>
             <TouchableOpacity
               style={{
                 display: "flex",
@@ -113,14 +163,7 @@ export const DiagnosticResult: React.FC<DiagnosticResultPropsType> = ({
             </TouchableOpacity>
           </View>
         </View>
-      )}
-      <Overlay
-        visible={isLoading}
-        overlayColor="#87DBFF"
-        textContent="診断中です・・・・・・"
-        size={Platform.OS === "android" ? 50 : "large"}
-        textStyle={{ color: "white", fontWeight: "400", marginTop: -30 }}
-      />
+      </ScrollView>
     </SafeAreaView>
   );
 };

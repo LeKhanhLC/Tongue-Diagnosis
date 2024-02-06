@@ -1,6 +1,7 @@
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Platform,
   StatusBar,
@@ -16,6 +17,7 @@ import { ImagePickerAsset, PermissionStatus } from "expo-image-picker";
 import { useMutation } from "react-query";
 import Overlay from "react-native-loading-spinner-overlay";
 import { uploadImageData } from "../../api/postImage";
+import mime from "mime";
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Home">;
 
@@ -25,11 +27,12 @@ export const Home: React.FC<HomePropsType> = ({ navigation }) => {
   const [imagePicker, setImagePicker] = useState<ImagePickerAsset | null>(null);
 
   const getFormData = () => {
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append("file", {
       uri: imagePicker?.uri,
-      name: imagePicker?.fileName,
-      type: "image",
+      name: imagePicker?.uri.split("/").pop(),
+      type: mime.getType(imagePicker?.uri as string),
+      // type: "image/jpeg",
     } as unknown as Blob);
     return formData;
   };
@@ -63,17 +66,9 @@ export const Home: React.FC<HomePropsType> = ({ navigation }) => {
     mutate();
   };
 
-  if (isLoading) {
-    return (
-      <Overlay
-        visible={isLoading}
-        overlayColor="#87DBFF"
-        textContent="診断中です・・・・・・"
-        size={Platform.OS === "android" ? 50 : "large"}
-        textStyle={{ color: "white", fontWeight: "400", marginTop: -30 }}
-      />
-    );
-  }
+  useEffect(() => {
+    setImagePicker(null);
+  }, [navigation]);
 
   return (
     <SafeAreaView
@@ -84,6 +79,8 @@ export const Home: React.FC<HomePropsType> = ({ navigation }) => {
     >
       <View
         style={{
+          borderWidth: 1,
+          borderColor: "#000000",
           backgroundColor: "#ffffff",
           borderRadius: 10,
           marginBottom: 40,
@@ -112,7 +109,7 @@ export const Home: React.FC<HomePropsType> = ({ navigation }) => {
             }
             style={styles.image}
           />
-          <Text>
+          <Text style={{ fontSize: 20 }}>
             {!!imagePicker?.fileName ? imagePicker.fileName : "サンプル"}
           </Text>
 
@@ -176,7 +173,11 @@ export const Home: React.FC<HomePropsType> = ({ navigation }) => {
               }}
               onPress={handleUpload}
             >
-              <Text style={{ fontSize: 40, color: "#ffffff" }}>診断する</Text>
+              {isLoading ? (
+                <ActivityIndicator color="#ffffff" size="large" />
+              ) : (
+                <Text style={{ fontSize: 40, color: "#ffffff" }}>診断する</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
