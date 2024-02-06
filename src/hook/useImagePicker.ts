@@ -35,8 +35,8 @@ const useImagePicker = ({ onPickPhoto }: PickPhotoOptions): UserImagePicker => {
     pickPhoto: async () => {
       const photo = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
+        // allowsEditing: true,
+        // aspect: [4, 3],
         quality: 1,
       });
       await onPickPhoto(photo);
